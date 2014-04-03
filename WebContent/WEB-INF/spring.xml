@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<b:beans xmlns:b="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:p="http://www.springframework.org/schema/p"
+       xmlns:dwr="http://www.directwebremoting.org/schema/spring-dwr"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+                           http://www.directwebremoting.org/schema/spring-dwr http://www.directwebremoting.org/schema/spring-dwr-2.0.xsd
+                           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
+                           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd"
+                           >
+
+
+
+<!-- ======================== DWR ENABLEMENT ======================== -->
+ 
+
+    <b:bean id="dwrUrlMapping"  class="org.springframework.web.servlet.handler.SimpleUrlHandlerMapping">
+      <b:property name="alwaysUseFullPath" value="true"/>
+      <b:property name="mappings">
+      <b:props>
+        <b:prop key="/dwr/**/*">dwrController</b:prop>
+      </b:props>
+      </b:property>
+    </b:bean>
+    
+
+
+     <dwr:controller id="dwrController" debug="true" >
+                <dwr:config-param name="activeReverseAjaxEnabled" value="true"/>
+                <dwr:config-param name="scriptSessionTimeout" value="600000" />
+                <dwr:config-param name="initApplicationScopeCreatorsAtStartup" value="true" />
+                <dwr:config-param name="maxWaitAfterWrite" value="500" />
+      </dwr:controller >
+
+     <dwr:configuration >
+     
+		<dwr:convert class="java.lang.Exception" type="exception"/>
+
+	    <!--dwr:convert class="java.lang.StackTraceElement" type="bean"/-->
+     
+       	<dwr:convert type="bean" class="ws4is.tn5250.Request"/>
+     	<dwr:convert type="bean" class="ws4is.tn5250.ScreenElement"/>  
+   
+
+		<dwr:signatures>
+		  <![CDATA[
+		  import java.util.List;
+		  import ws4is.tn5250.Dwr5250;
+		  import ws4is.tn5250.Request;
+		  import ws4is.tn5250.ScreenElement;
+		  
+		  public ScreenElement[] Dwr5250.processRequest(ScreenElement[] fields, Request request)throws Exception;
+		  ]]>
+		</dwr:signatures>         
+     </dwr:configuration >
+
+<!-- ======================== WS4IS DESKTOP BEANS ======================== -->
+
+<!-- Web5250DWR Proxy class -->
+<b:bean id="tn5250" class="ws4is.tn5250.Dwr5250">
+ <b:constructor-arg value="10.10.10.5"/>
+             <dwr:remote javascript="Tn5250Proxy">
+                <dwr:include method="CreateSession" />
+                <dwr:include method="DeleteSession" />
+                <dwr:include method="processRequest" />                
+            </dwr:remote>
+</b:bean>
+
+</b:beans>
